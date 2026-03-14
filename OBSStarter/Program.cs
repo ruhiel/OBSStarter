@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Threading;
-
+using System.Windows.Forms;
 class Program
 {
     const string OBS_PROCESS_NAME = "obs64";
@@ -66,12 +66,27 @@ class Program
         // 3. OBSが「完全に」起動する（ウィンドウが出る）まで待機
         Console.WriteLine("[3/3] OBSの初期化完了を待っています...");
         WaitForWindow(obsProcess);
+        
+        // --- 追加: 録画確認ダイアログ ---
+        var result = MessageBox.Show(
+            "モンスターハンターが起動しました。録画を開始しますか？",
+            "録画確認",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button1,
+            MessageBoxOptions.DefaultDesktopOnly); // 最前面に出すためのオプション
 
-        // シーン切り替え
-        RunObsCmd($"scene switch \"{SCENE_NAME}\"");
-
-        // 録画開始
-        RunObsCmd("recording start");
+        if (result == DialogResult.Yes)
+        {
+            Console.WriteLine("録画コマンドを送信します...");
+            RunObsCmd($"scene switch \"{SCENE_NAME}\"");
+            RunObsCmd("recording start");
+            Console.WriteLine("【完了】録画を開始しました。");
+        }
+        else
+        {
+            Console.WriteLine("【スキップ】録画は開始しませんでした。");
+        }
 
         Console.WriteLine("【完了】全プロセスが準備OKです。後続の処理を開始します。");
     }
